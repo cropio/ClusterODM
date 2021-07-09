@@ -26,7 +26,7 @@ module.exports = {
     // Raises an exception if docker-machine is not installed
     checkInstalled: async function(){
         const childProcess = spawn("docker-machine", ['--help']);
-    
+
         return new Promise((resolve, reject) => {
             childProcess
                 .on('exit', (code, signal) => {
@@ -35,7 +35,7 @@ module.exports = {
                         resolve();
                     }else reject(new Error("Docker-machine does not seem to work. Please make sure docker-machine is working."));                })
                 .on('error', () => reject(new Error("Docker-machine not found in PATH. Please install docker-machine if you want to use the autoscaler.")));
-            childProcess        
+            childProcess
         });
     },
 
@@ -68,7 +68,7 @@ module.exports = {
                         cleanup();
                         reject(new Error("Docker-machine not found in PATH. Please install docker-machine if you want to use the autoscaler."))
                     });
-                
+
                 const processOutput = chunk => {
                     const line = chunk.toString().trim();
                     logger.debug(line);
@@ -94,14 +94,18 @@ module.exports = {
             }
         }
 
+        async ip(){
+            return await this.run(["ip", this.machineName]);
+        }
+
         async ssh(command){
             return this.run(['ssh', this.machineName, command]);
         }
 
         async getIP(){
-            const info = await this.inspect();
-            if (info && info.Driver && info.Driver.IPAddress){
-                return info.Driver.IPAddress;
+            const ip = await this.ip();
+            if (ip){
+                return ip;
             }else{
                 throw new Error(`Cannot get IP for machine: ${this.machineName}`);
             }
